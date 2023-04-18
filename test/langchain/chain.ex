@@ -10,7 +10,7 @@ defmodule LangChain.ChainTest do
       processed_by: chainLink.name
     }
 
-    %ChainLink{
+    %LangChain.ChainLink{
       chainLink |
       rawResponses: outputs,
       output: output
@@ -18,34 +18,26 @@ defmodule LangChain.ChainTest do
   end
 
   test "Test individual Link" do
-    model = %LLM{
+    model = %LangChain.LLM{
       provider: :openai,
       modelName: "text-ada-001",
       maxTokens: 10,
       temperature: 0.5
     }
-    chat = Chat.addPromptTemplates(%Chat{}, [
-      %{role: "user", prompt: %PromptTemplate{template: "memorize <%= spell %>"}},
-      %{role: "user", prompt: %PromptTemplate{template: "cast <%= spell %> on lantern"}},
+    chat = LangChain.Chat.addPromptTemplates(%LangChain.Chat{}, [
+      %{role: "user", prompt: %LangChain.PromptTemplate{template: "memorize <%= spell %>"}},
+      %{role: "user", prompt: %LangChain.PromptTemplate{template: "cast <%= spell %> on lantern"}},
     ])
-    link = %ChainLink{
+    link = %LangChain.ChainLink{
       name: "enchanter",
       input: chat,
       outputParser: &tempParser/2
     }
     # when we evaluate a chain link, we get a new chain link with the output variables
-    newLinkState = ChainLink.call(link, %{spell: "frotz"})
+    newLinkState = LangChain.ChainLink.call(link, %{spell: "frotz"})
     # make sure it's the right link and the output has the right keys
     assert "enchanter" == newLinkState.output.processed_by
     assert Map.keys(newLinkState.output) == [:outputs, :processed_by, :text]
     IO.inspect newLinkState.output.text # the AI's response won't be the same every time!
   end
 end
-
-# chain = %LLMChain{
-#   llm: model,
-#   prompt: prompt,
-#   # input: %{foo: "foo"}
-# }
-# res = LLMChain.call(chain, %{foo: "my favorite color"})
-# IO.inspect res

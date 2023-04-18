@@ -2,7 +2,7 @@ defmodule LangChain.ChatTest do
   use ExUnit.Case
 
   # test "Test OpenAI" do
-  #   model = %LLM{
+  #   model = %LangChain.LLM{
   #     provider: :openai,
   #     modelName: "text-ada-001",
   #     maxTokens: 10,
@@ -15,11 +15,11 @@ defmodule LangChain.ChatTest do
   # end
 
   test "test gpt-3.5-turbo" do
-    model = %LLM{
+    model = %LangChain.LLM{
       provider: :openai,
       modelName: "gpt-3.5-turbo",
     }
-    { :ok, response } = LLM.chat(model, [
+    { :ok, response } = LangChain.LLM.chat(model, [
       %{text: "Multiply 7 times 6", role: "system"},
       %{content: "Now add twelve to that", role: "user"},
       %{text: "Now print the square root of the final result, round it off to 2 decimal points and put a '#' character on either side", role: "assistant"},

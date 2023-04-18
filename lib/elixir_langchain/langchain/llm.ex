@@ -1,5 +1,5 @@
 # does generic processing that all providers can use
-defmodule LLM do
+defmodule LangChain.LLM do
   # these are the defaults values for a LLM model
   defstruct [
     provider: :openai,
@@ -17,7 +17,7 @@ defmodule LLM do
   #   %{text: "I'm a generic message. I'm Foo. I'm Bar.", role: "test"}
   def chat(model, chats) do
     case model.provider do
-      :openai -> Providers.OpenAI.chat(model, chats)
+      :openai -> LangChain.Providers.OpenAI.chat(model, chats)
       # :gpt3 -> handle_gpt3_call(model, prompt)
       _ -> "unknown provider #{model.provider}"
     end
@@ -25,7 +25,7 @@ defmodule LLM do
 
   def call(model, prompt) do
     case model.provider do
-      :openai -> Providers.OpenAI.call(model, prompt)
+      :openai -> LangChain.Providers.OpenAI.call(model, prompt)
       # :gpt3 -> handle_gpt3_call(model, prompt)
       _ -> "unknown provider #{model.provider}"
     end

@@ -2,31 +2,31 @@ defmodule LangChain.ChatTest do
   use ExUnit.Case
 
   def create_chat() do
-    system_prompt = %PromptTemplate{
+    system_prompt = %LangChain.PromptTemplate{
       template: "Here is a spell name: <%= spell %>",
       inputVariables: [:context],
       src: :system
     }
 
-    user_prompt = %PromptTemplate{
+    user_prompt = %LangChain.PromptTemplate{
       template: "Do you know what <%= spell %> actually does?",
       inputVariables: [:foo, :bar, :context],
       src: :user
     }
 
-    ai_prompt = %PromptTemplate{
+    ai_prompt = %LangChain.PromptTemplate{
       template: "I'm an AI named <%= aiName %> and <%= spell %> is like <%= anotherSpell %> or <%= spellThree %> except better",
       inputVariables: [:foo, :bar],
       src: :ai
     }
 
-    generic_prompt = %PromptTemplate{
+    generic_prompt = %LangChain.PromptTemplate{
       template: "List all the spells in the above conversation except <%= spellThree %>",
       inputVariables: [:foo, :bar],
       src: :generic
     }
 
-    %Chat{
+    %LangChain.Chat{
       promptMessages: [
         %{prompt: system_prompt},
         %{prompt: user_prompt},
@@ -39,7 +39,7 @@ defmodule LangChain.ChatTest do
 
   test "Test format" do
     chat = create_chat()
-    {:ok, results} = Chat.format(chat, %{
+    {:ok, results} = LangChain.Chat.format(chat, %{
       spell: "rezrov",
       anotherSpell: "gnusto",
       spellThree: "throck",
@@ -54,7 +54,7 @@ defmodule LangChain.ChatTest do
 
   test "Test serialize" do
     {:ok, chatSerialized } = create_chat()
-      |> Chat.serialize()
+      |> LangChain.Chat.serialize()
     assert chatSerialized = %{
       inputVariables: [:context, :foo, :bar],
       promptMessages: ["{\"prompt\":{\"inputVariables\":[\"context\"],\"partialVariables\":{},\"src\":\"user\",\"template\":\"Here's some context: {context}\"}}",

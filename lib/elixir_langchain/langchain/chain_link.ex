@@ -6,12 +6,12 @@ when called, a chainlink will
  3. parse the response with the outputParser
  4. store any output
 """
-defmodule ChainLink do
+defmodule LangChain.ChainLink do
   @derive Jason.Encoder
   defstruct [
     name: "Void",
-    input: %Chat{},
-    outputParser: &ChainLink.no_parse/2, # takes in the ChainLink and the list of all responses
+    input: %LangChain.Chat{},
+    outputParser: &LangChain.ChainLink.no_parse/2, # takes in the ChainLink and the list of all responses
     # from the model, pass your own outputParser to parse the output of your chat interactions
     rawResponses: [],  # the actual response returned by the model
     output: %{},  # output should be a map of %{ variable: value } produced by outputParser
@@ -19,10 +19,10 @@ defmodule ChainLink do
   ]
 
   def call(chainLink, previousValues \\ %{}) do
-    {:ok, evaluatedTemplates } = Chat.format(chainLink.input, previousValues)
+    {:ok, evaluatedTemplates } = LangChain.Chat.format(chainLink.input, previousValues)
     # extract just the role and text fields from each prompt
     modelInputs = Enum.map(evaluatedTemplates, fn evaluatedTemplate -> Map.take(evaluatedTemplate, [:role, :text]) end)
-    case LLM.chat(chainLink.input.llm, modelInputs) do
+    case LangChain.LLM.chat(chainLink.input.llm, modelInputs) do
       {:ok, response} ->
         chainLink.outputParser.(chainLink, response)
       {:error, reason} ->
@@ -40,5 +40,24 @@ defmodule ChainLink do
       rawResponses: outputs,
       output: %{ text: outputs |> List.first |> Map.get(:text) }
     }
+  end
+end
+
+defmodule LangChain.Chain do
+  @derive Jason.Encoder
+  defstruct [
+    links: []  # List of ChainLinks, processed in order
+  ]
+
+  def call(lang_chain) do
+    call(lang_chain, %{})
+  end
+
+  defp call(lang_chain, previous_values) do
+    Enum.reduce(lang_chain.links, previous_values, fn chain_link, acc ->
+      updated_chain_link = LangChain.ChainLink.call(chain_link, acc)
+      # Merge the output of the current ChainLink with the accumulated previous values
+      Map.merge(acc, updated_chain_link.output)
+    end)
   end
 end

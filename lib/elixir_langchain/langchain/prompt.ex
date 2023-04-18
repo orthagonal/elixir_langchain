@@ -2,7 +2,7 @@
 # you can pass it a set of values and it will interpolate them
 # you can also partially evaluate the template by calling the partial/2 function
 # inputVariables will always be a list of variables that still need to be specified
-defmodule PromptTemplate do
+defmodule LangChain.PromptTemplate do
   # template is the template as a string
   # inputVariables is a list of variables that need to be specified for that template
   # partialVariables is a map of variables that have already been specified and can be applied to the template
@@ -38,7 +38,7 @@ defmodule PromptTemplate do
     keys = Map.keys(partial)
     inputVariablesWithoutPartial = template.inputVariables -- keys
     partialVariables = Map.merge(template.partialVariables, partial)
-    {:ok, %PromptTemplate{
+    {:ok, %LangChain.PromptTemplate{
       template: template.template,
       inputVariables: inputVariablesWithoutPartial,
       partialVariables: partialVariables
@@ -49,59 +49,4 @@ defmodule PromptTemplate do
   #   # Implement the serialization logic for the specific prompt message type here.
   #   # You might need to pattern match or use a separate function for each message type.
   # end
-end
-
-
-
-
-defmodule OutputResult do
-#   @derive Jason.Encoder
-#   defstruct [
-#     prompt: %PromptTemplate{},
-#     result: "", # text result output by the previous prompt
-#     outputVariables: %{}, # variables parsed from the result
-#     output_parser: &OutputResult.no_parse/1,
-#   ]
-#   # default parser passes the result along
-  def no_parse(text) do text end
-
-#   def parse(outputParser, output) do
-
-#   end
-
-#   def serialize(promptResult) do
-#     {:ok, %{
-#       prompt: Jason.encode!(promptResult.prompt),
-#       result: promptResult.result
-#     }}
-#   end
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-defmodule Prompt do
-  use GenServer
-
-  def start_link do
-    GenServer.start_link(__MODULE__, %{})
-  end
-
-  def get_prompt_type(prompt) do
-    prompt.prompt_type
-  end
-
-
 end

@@ -1,8 +1,8 @@
 
 # a list of PromptTemplate, constituting the chat dialogue up to that point
-defmodule Chat do
+defmodule LangChain.Chat do
   @derive Jason.Encoder
-  defstruct [template: "", inputVariables: [], partialVariables: %{}, promptMessages: [], llm: %LLM{
+  defstruct [template: "", inputVariables: [], partialVariables: %{}, promptMessages: [], llm: %LangChain.LLM{
     provider: :openai,
     modelName: "gpt-3.5-turbo",  # model must support chat dialogue history
   }]
@@ -10,7 +10,7 @@ defmodule Chat do
   # loops over every prompt and formats it with the values supplied
   def format(chat, values) do
     resultMessages = Enum.map(chat.promptMessages, fn promptMessage ->
-      { :ok, text } = PromptTemplate.format(promptMessage.prompt, values)
+      { :ok, text } = LangChain.PromptTemplate.format(promptMessage.prompt, values)
       Map.put(promptMessage, :text, text)
     end)
     {:ok, resultMessages}
