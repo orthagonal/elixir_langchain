@@ -42,22 +42,3 @@ defmodule LangChain.ChainLink do
     }
   end
 end
-
-defmodule LangChain.Chain do
-  @derive Jason.Encoder
-  defstruct [
-    links: []  # List of ChainLinks, processed in order
-  ]
-
-  def call(lang_chain) do
-    call(lang_chain, %{})
-  end
-
-  defp call(lang_chain, previous_values) do
-    Enum.reduce(lang_chain.links, previous_values, fn chain_link, acc ->
-      updated_chain_link = LangChain.ChainLink.call(chain_link, acc)
-      # Merge the output of the current ChainLink with the accumulated previous values
-      Map.merge(acc, updated_chain_link.output)
-    end)
-  end
-end
