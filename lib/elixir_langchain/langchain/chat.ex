@@ -2,7 +2,10 @@
 # a list of PromptTemplate, constituting the chat dialogue up to that point
 defmodule Chat do
   @derive Jason.Encoder
-  defstruct [template: "", inputVariables: [], partialVariables: %{}, promptMessages: [], llm: %LLM{}]
+  defstruct [template: "", inputVariables: [], partialVariables: %{}, promptMessages: [], llm: %LLM{
+    provider: :openai,
+    modelName: "gpt-3.5-turbo",  # model must support chat dialogue history
+  }]
 
   # loops over every prompt and formats it with the values supplied
   def format(chat, values) do
