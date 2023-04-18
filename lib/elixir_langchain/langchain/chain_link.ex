@@ -11,9 +11,10 @@ defmodule ChainLink do
   defstruct [
     name: "Void",
     input: %Chat{},
-    outputParser: &ChainLink.no_parse/2, # take list of all outputs and the ChainLink that evaluated them
+    outputParser: &ChainLink.no_parse/2, # takes in the ChainLink and the list of all responses
+    # from the model, pass your own outputParser to parse the output of your chat interactions
     rawResponses: [],  # the actual response returned by the model
-    output: %{},  # output can be anything, but a map of variables => values is common
+    output: %{},  # output should be a map of %{ variable: value } produced by outputParser
     errors: []  # list of errors that occurred during evaluation
   ]
 
@@ -21,26 +22,23 @@ defmodule ChainLink do
     {:ok, evaluatedTemplates } = Chat.format(chainLink.input, previousValues)
     # extract just the role and text fields from each prompt
     modelInputs = Enum.map(evaluatedTemplates, fn evaluatedTemplate -> Map.take(evaluatedTemplate, [:role, :text]) end)
-    IO.puts "Model inputs are:"
-    IO.inspect chainLink.input.llm
     case LLM.chat(chainLink.input.llm, modelInputs) do
       {:ok, response} ->
-        parsed_output = chainLink.outputParser.(response, chainLink)
-        %{chainLink |
-          rawResponses: response,
-          output: parsed_output
-        }
+        chainLink.outputParser.(chainLink, response)
       {:error, reason} ->
         IO.inspect reason
         chainLink |> Map.put(:errors, [reason])
     end
   end
 
-  defp noParse(outputs, chainLink) do
+  # you can define your own parser functions, but this is the default
+  # the output of the ChainLink will be used as variables in the next link
+  # by default the simple text response goes in the :text key
+  defp noParse(chainLink, outputs) do
     %{
-      outputs: outputs,
-      response: outputs |> List.first |> Map.get(:text),
-      processed_by: chainLink.name
+      chainLink |
+      rawResponses: outputs,
+      output: %{ text: outputs |> List.first |> Map.get(:text) }
     }
   end
 end

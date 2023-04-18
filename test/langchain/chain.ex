@@ -2,11 +2,18 @@ defmodule LangChain.ChainTest do
   use ExUnit.Case
 
   # takes list of all outputs and the ChainLink that evaluated them
-  def tempParser(outputs, chainlink) do
-    %{
+  # returns the new state of the ChainLink
+  def tempParser(chainLink, outputs) do
+    output = %{
       outputs: outputs,
-      response: outputs |> List.first |> Map.get(:text),
-      processed_by: chainlink.name
+      text: outputs |> List.first |> Map.get(:text),
+      processed_by: chainLink.name
+    }
+
+    %ChainLink{
+      chainLink |
+      rawResponses: outputs,
+      output: output
     }
   end
 
@@ -30,8 +37,8 @@ defmodule LangChain.ChainTest do
     newLinkState = ChainLink.call(link, %{spell: "frotz"})
     # make sure it's the right link and the output has the right keys
     assert "enchanter" == newLinkState.output.processed_by
-    assert Map.keys(newLinkState.output) == [:outputs, :processed_by, :response]
-    IO.inspect newLinkState.output.response # the AI's response won't be the same every time!
+    assert Map.keys(newLinkState.output) == [:outputs, :processed_by, :text]
+    IO.inspect newLinkState.output.text # the AI's response won't be the same every time!
   end
 end
 
